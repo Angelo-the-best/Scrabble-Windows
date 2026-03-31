@@ -125,7 +125,7 @@ public class UI {
 
         JFrame frame2 = new JFrame("Select Difficulty");
         frame2.setFont(new Font("Menlo", Font.BOLD, 10));
-        frame2.setSize(300, 315);  // increased for Windows
+        frame2.setSize(300, 260);
         frame2.setLocationRelativeTo(null);
         frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -518,7 +518,7 @@ public class UI {
         freezeBoard();
 
         JFrame frame5 = new JFrame("Message Window");
-        frame5.setSize(300, 315);  // increased for Windows
+        frame5.setSize(300, 260);
         frame5.setLocationRelativeTo(null);
         frame5.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -559,7 +559,7 @@ public class UI {
         freezeBoard();
 
         JFrame frame6 = new JFrame("Replace Window");
-        frame6.setSize(350, 308);  // increased for Windows
+        frame6.setSize(350, 260);
         frame6.setLocationRelativeTo(null);
         frame6.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -645,7 +645,7 @@ public class UI {
     public void window6(int count) {
 
         JFrame replaceFrame = new JFrame("");
-        replaceFrame.setSize(450, 280);  // increased for Windows
+        replaceFrame.setSize(450, 240);
         replaceFrame.setLocationRelativeTo(null);
         replaceFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -764,7 +764,7 @@ public class UI {
         final char[] result = new char[1];
 
         JDialog dialog = new JDialog(frame3, "Blank Tile", true);
-        dialog.setSize(350, 308);  // increased for Windows
+        dialog.setSize(350, 260);
         dialog.setLocationRelativeTo(frame3);
         dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 
