@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "UI",
+            "request": "launch",
+            "mainClass": "UI",
+            "projectName": "Project Folder_7ab61bd9"
+        },
+        {
+            "type": "java",
+            "name": "Launch Game",
+            "request": "launch",
+            "mainClass": "PlayerLogic",
+            "vmArgs": "-Dsun.java2d.uiScale=2",
+            "classPaths": [
+                "bin",
+                "resources"
+            ]
+        }
+    ]
+}
