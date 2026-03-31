@@ -28,7 +28,7 @@ public class UI {
     public JLabel yourTurnBox;
     public JFrame frame3;
     public JButton exitButton;
-    private javax.swing.Timer resizeTimer = null;  // throttle resize events
+    private javax.swing.Timer resizeTimer = null;
     protected static int[] Letters_Array = {
         1,1,1,1,1,1,1,1,1,2,2,3,3,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,6,6,
         7,7,7,8,8,9,9,9,9,9,9,9,9,9,10,11,12,12,12,12,13,13,14,14,14,14,14,14,
@@ -39,7 +39,6 @@ public class UI {
     public UI() {
     }
 
-    // Load image from resources/images/ folder
     protected ImageIcon loadIcon(String filename) {
         URL url = getClass().getResource("/images/" + filename);
         if (url != null) return new ImageIcon(url);
@@ -126,7 +125,7 @@ public class UI {
 
         JFrame frame2 = new JFrame("Select Difficulty");
         frame2.setFont(new Font("Menlo", Font.BOLD, 10));
-        frame2.setSize(300, 225);
+        frame2.setSize(300, 315);  // increased for Windows
         frame2.setLocationRelativeTo(null);
         frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -213,6 +212,7 @@ public class UI {
         scoreTable.getTableHeader().setForeground(blue2);
         scoreTable.getTableHeader().setBackground(blue1);
         scoreTable.setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, blue2));
+        scoreTable.setGridColor(Color.WHITE);
         scoreTable.setEnabled(false);
 
         scoreTable.getColumnModel().getColumn(1).setCellRenderer(new DefaultTableCellRenderer() {
@@ -424,7 +424,7 @@ public class UI {
         bigbackground.add(buttonPanel3, BorderLayout.EAST);
         bigbackground.add(scoreLetterPanel, BorderLayout.WEST);
 
-        // ── Resize listener with 50ms throttle so it doesn't lag on Windows ──
+        // ── Resize listener with 50ms throttle ────────────────────────────
         frame3.addComponentListener(new java.awt.event.ComponentAdapter() {
             @Override public void componentResized(java.awt.event.ComponentEvent e) {
                 if (resizeTimer != null && resizeTimer.isRunning()) resizeTimer.stop();
@@ -434,14 +434,12 @@ public class UI {
                     int fw = frame3.getWidth(), fh = frame3.getHeight();
                     double sc = Math.max(0.3, Math.min(fw / 1300.0, fh / 900.0));
 
-                    // ── Board ──────────────────────────────────────────
                     int bs = (Math.round((int)(750 * sc) / 15)) * 15;
                     if (bs < 15) bs = 15;
                     boardPanel.setPreferredSize(new Dimension(bs, bs));
                     boardPanel.setMinimumSize(new Dimension(bs, bs));
                     boardPanel.setMaximumSize(new Dimension(bs, bs));
 
-                    // ── Cell icons ─────────────────────────────────────
                     int cellSz = Math.max(10, (int)((bs / 15) * 0.9));
                     for (int r = 0; r < 15; r++) {
                         for (int c2 = 0; c2 < 15; c2++) {
@@ -455,7 +453,6 @@ public class UI {
                         }
                     }
 
-                    // ── Score table ────────────────────────────────────
                     int tf = Math.max(8, (int)(18 * sc));
                     scoreTable.setFont(new Font("Menlo", Font.BOLD, tf));
                     scoreTable.setRowHeight(Math.max(15, (int)(35 * sc)));
@@ -464,13 +461,11 @@ public class UI {
                     scoreTable.getColumnModel().getColumn(0).setPreferredWidth((int)(140 * sc));
                     scoreTable.getColumnModel().getColumn(1).setPreferredWidth((int)(60  * sc));
 
-                    // ── Info labels ────────────────────────────────────
                     lettersLeftBox.setFont(new Font("Menlo", Font.BOLD, tf));
                     lettersLeftBox.setPreferredSize(
                         new Dimension((int)(200 * sc), (int)(35 * sc)));
                     yourTurnBox.setFont(new Font("Menlo", Font.BOLD, tf));
 
-                    // ── Letter rack tiles ──────────────────────────────
                     int tileSz = cellSz;
                     for (Component comp : letters.getComponents()) {
                         if (comp instanceof JLabel) {
@@ -486,7 +481,6 @@ public class UI {
                     }
                     letters.revalidate();
 
-                    // ── Buttons ────────────────────────────────────────
                     int bf = Math.max(10, (int)(20 * sc));
                     submit.setFont(new Font("Menlo", Font.BOLD, bf));
                     replace.setFont(new Font("Menlo", Font.BOLD, bf));
@@ -524,7 +518,7 @@ public class UI {
         freezeBoard();
 
         JFrame frame5 = new JFrame("Message Window");
-        frame5.setSize(300, 225);
+        frame5.setSize(300, 315);  // increased for Windows
         frame5.setLocationRelativeTo(null);
         frame5.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -565,7 +559,7 @@ public class UI {
         freezeBoard();
 
         JFrame frame6 = new JFrame("Replace Window");
-        frame6.setSize(350, 220);
+        frame6.setSize(350, 308);  // increased for Windows
         frame6.setLocationRelativeTo(null);
         frame6.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -651,7 +645,7 @@ public class UI {
     public void window6(int count) {
 
         JFrame replaceFrame = new JFrame("");
-        replaceFrame.setSize(450, 200);
+        replaceFrame.setSize(450, 280);  // increased for Windows
         replaceFrame.setLocationRelativeTo(null);
         replaceFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -770,7 +764,7 @@ public class UI {
         final char[] result = new char[1];
 
         JDialog dialog = new JDialog(frame3, "Blank Tile", true);
-        dialog.setSize(350, 220);
+        dialog.setSize(350, 308);  // increased for Windows
         dialog.setLocationRelativeTo(frame3);
         dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 
