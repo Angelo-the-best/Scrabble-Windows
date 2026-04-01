@@ -36,7 +36,7 @@ public class UI {
     protected static int TILE_SIZE = 45;
 
     private static int sw(int base) { return Math.max(50, (int)(base * SC)); }
-    private static int sh(int base) { return Math.max(50, (int)(base * SC)); }
+    private static int sh(int base) { return Math.max(30, (int)(base * SC)); }
 
     protected static int[] Letters_Array = {
         1,1,1,1,1,1,1,1,1,2,2,3,3,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,6,6,
@@ -54,23 +54,6 @@ public class UI {
         URL url = getClass().getResource("/images/" + filename);
         if (url != null) return new ImageIcon(url);
         return new ImageIcon("resources/images/" + filename);
-    }
-
-    // High quality image scaling using BICUBIC interpolation.
-    protected Image scaleImage(String filename, int size) {
-        ImageIcon icon = loadIcon(filename);
-        java.awt.image.BufferedImage buf = new java.awt.image.BufferedImage(
-            size, size, java.awt.image.BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = buf.createGraphics();
-        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-            RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-        g2.setRenderingHint(RenderingHints.KEY_RENDERING,
-            RenderingHints.VALUE_RENDER_QUALITY);
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-            RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.drawImage(icon.getImage(), 0, 0, size, size, null);
-        g2.dispose();
-        return buf;
     }
 
     // Builds and displays the main menu window with Play and Exit buttons.
@@ -107,18 +90,10 @@ public class UI {
 
         final JButton playButton = new JButton(" Play ");
         styleButton(playButton, blue2, blue1, true, 20);
+        playButton.addActionListener(e -> { frame1.dispose(); window2(); });
 
         exitButton = new JButton(" Exit ");
         styleButton(exitButton, blue2, blue1, true, 20);
-
-        // Make menu buttons the same fixed width
-        Dimension menuBtnSize = new Dimension(sw(160), sh(45));
-        playButton.setPreferredSize(menuBtnSize);
-        playButton.setMaximumSize(menuBtnSize);
-        exitButton.setPreferredSize(menuBtnSize);
-        exitButton.setMaximumSize(menuBtnSize);
-
-        playButton.addActionListener(e -> { frame1.dispose(); window2(); });
         exitButton.addActionListener(e -> System.exit(0));
 
         JPanel buttonPanel = new JPanel();
@@ -184,12 +159,6 @@ public class UI {
         JButton hard = new JButton(" Hard ");
         styleButton(hard, blue2, blue1, true, 17);
         hard.addActionListener(e -> { difficulty = 3; frame2.dispose(); window3(); });
-
-        // Make difficulty buttons the same fixed width
-        Dimension diffBtnSize = new Dimension(sw(160), sh(40));
-        easy.setPreferredSize(diffBtnSize);   easy.setMaximumSize(diffBtnSize);
-        medium.setPreferredSize(diffBtnSize); medium.setMaximumSize(diffBtnSize);
-        hard.setPreferredSize(diffBtnSize);   hard.setMaximumSize(diffBtnSize);
 
         JPanel buttonPanel2 = new JPanel();
         buttonPanel2.setLayout(new BoxLayout(buttonPanel2, BoxLayout.Y_AXIS));
@@ -336,11 +305,11 @@ public class UI {
             System.exit(0);
         });
 
-        Dimension btnSize = new Dimension(sw(130), sh(40));
-        submit.setPreferredSize(btnSize);  submit.setMaximumSize(btnSize);
-        replace.setPreferredSize(btnSize); replace.setMaximumSize(btnSize);
-        pass.setPreferredSize(btnSize);    pass.setMaximumSize(btnSize);
-        exit.setPreferredSize(btnSize);    exit.setMaximumSize(btnSize);
+        // Cap button width at natural preferred size — prevents stretching in BoxLayout
+        capButtonSize(submit);
+        capButtonSize(replace);
+        capButtonSize(pass);
+        capButtonSize(exit);
 
         JPanel buttonPanel3 = new JPanel();
         buttonPanel3.setLayout(new BoxLayout(buttonPanel3, BoxLayout.Y_AXIS));
@@ -433,7 +402,9 @@ public class UI {
             lettersLeftBox.setText(" Letters Left: " + letters_left + " ");
 
             String filename = num + ".png";
-            Image scaled = scaleImage(filename, TILE_SIZE);
+            ImageIcon icon = loadIcon(filename);
+            // Use SCALE_SMOOTH — matches bot tile rendering and PlayerLogic
+            Image scaled = icon.getImage().getScaledInstance(TILE_SIZE, TILE_SIZE, Image.SCALE_SMOOTH);
 
             JLabel slot = new JLabel(new ImageIcon(scaled));
             slot.setName(filename);
@@ -503,12 +474,16 @@ public class UI {
 
                     int cellSz = Math.max(10, (int)((bs / 15) * 0.9));
                     TILE_SIZE = cellSz;
+
+                    // Board placed tiles
                     for (int r = 0; r < 15; r++) {
                         for (int c2 = 0; c2 < 15; c2++) {
                             JLabel cell = cells[r][c2];
                             String fname = cell.getName();
                             if (cell.getIcon() != null && fname != null && !fname.isEmpty()) {
-                                cell.setIcon(new ImageIcon(scaleImage(fname, cellSz)));
+                                Image img = loadIcon(fname).getImage()
+                                    .getScaledInstance(cellSz, cellSz, Image.SCALE_SMOOTH);
+                                cell.setIcon(new ImageIcon(img));
                             }
                         }
                     }
@@ -524,6 +499,7 @@ public class UI {
                     lettersLeftBox.setFont(new Font("Menlo", Font.BOLD, tf));
                     yourTurnBox.setFont(new Font("Menlo", Font.BOLD, tf));
 
+                    // Rack tiles
                     int tileSz = cellSz;
                     for (Component comp : letters.getComponents()) {
                         if (comp instanceof JLabel) {
@@ -531,24 +507,23 @@ public class UI {
                             lbl.setPreferredSize(new Dimension(tileSz + 5, tileSz + 5));
                             String fname = lbl.getName();
                             if (fname != null && !fname.isEmpty() && lbl.getIcon() != null) {
-                                lbl.setIcon(new ImageIcon(scaleImage(fname, tileSz)));
+                                Image img = loadIcon(fname).getImage()
+                                    .getScaledInstance(tileSz, tileSz, Image.SCALE_SMOOTH);
+                                lbl.setIcon(new ImageIcon(img));
                             }
                         }
                     }
                     letters.revalidate();
 
                     int bf = Math.max(10, (int)(20 * sc));
-                    int bw = (int)(sw(130) * sc);
-                    int bh = (int)(sh(40)  * sc);
-                    Dimension nd = new Dimension(bw, bh);
                     submit.setFont(new Font("Menlo", Font.BOLD, bf));
                     replace.setFont(new Font("Menlo", Font.BOLD, bf));
                     pass.setFont(new Font("Menlo", Font.BOLD, bf));
                     exit.setFont(new Font("Menlo", Font.BOLD, bf));
-                    submit.setPreferredSize(nd);  submit.setMaximumSize(nd);
-                    replace.setPreferredSize(nd); replace.setMaximumSize(nd);
-                    pass.setPreferredSize(nd);    pass.setMaximumSize(nd);
-                    exit.setPreferredSize(nd);    exit.setMaximumSize(nd);
+                    capButtonSize(submit);
+                    capButtonSize(replace);
+                    capButtonSize(pass);
+                    capButtonSize(exit);
 
                     frame3.revalidate();
                     frame3.repaint();
@@ -604,9 +579,7 @@ public class UI {
 
         JButton errorButton = new JButton(" Go back ");
         styleButton(errorButton, blue2, blue1, true, 16);
-        Dimension popBtnSize = new Dimension(sw(140), sh(38));
-        errorButton.setPreferredSize(popBtnSize);
-        errorButton.setMaximumSize(popBtnSize);
+        capButtonSize(errorButton);
         errorButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         errorButton.addActionListener(e -> {
             unfreezeBoard();
@@ -654,12 +627,11 @@ public class UI {
 
         JButton confirm = new JButton(" Confirm ");
         styleButton(confirm, blue2, blue1, true, 15);
+        capButtonSize(confirm);
+
         JButton cancel = new JButton(" Cancel ");
         styleButton(cancel, blue2, blue1, true, 15);
-
-        Dimension popBtnSize = new Dimension(sw(120), sh(36));
-        confirm.setPreferredSize(popBtnSize); confirm.setMaximumSize(popBtnSize);
-        cancel.setPreferredSize(popBtnSize);  cancel.setMaximumSize(popBtnSize);
+        capButtonSize(cancel);
 
         confirm.addActionListener(e -> {
             String input = field.getText().trim();
@@ -721,7 +693,7 @@ public class UI {
     public void window6(int count) {
 
         JFrame replaceFrame = new JFrame("");
-        replaceFrame.setSize(sw(460), sh(220));
+        replaceFrame.setSize(sw(460), sh(230));
         replaceFrame.setLocationRelativeTo(null);
         replaceFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -800,12 +772,11 @@ public class UI {
 
         JButton confirmButton = new JButton(" Confirm ");
         styleButton(confirmButton, blue2, blue1, true, 15);
+        capButtonSize(confirmButton);
+
         JButton cancelButton = new JButton(" Cancel ");
         styleButton(cancelButton, blue2, blue1, true, 15);
-
-        Dimension popBtnSize = new Dimension(sw(120), sh(36));
-        confirmButton.setPreferredSize(popBtnSize); confirmButton.setMaximumSize(popBtnSize);
-        cancelButton.setPreferredSize(popBtnSize);  cancelButton.setMaximumSize(popBtnSize);
+        capButtonSize(cancelButton);
 
         confirmButton.addActionListener(e -> {
             if (selectedIndices.size() != count) {
@@ -886,9 +857,7 @@ public class UI {
 
         JButton confirm = new JButton(" Confirm ");
         styleButton(confirm, blue2, blue1, true, 15);
-        Dimension popBtnSize = new Dimension(sw(140), sh(38));
-        confirm.setPreferredSize(popBtnSize);
-        confirm.setMaximumSize(popBtnSize);
+        capButtonSize(confirm);
         confirm.setAlignmentX(Component.CENTER_ALIGNMENT);
         confirm.addActionListener(e -> {
             String input = field.getText().trim();
@@ -975,6 +944,12 @@ public class UI {
                 disableButtons((Container) comp, disable);
             }
         }
+    }
+
+    // Caps a button's maximum size to its natural preferred size so it doesn't stretch in layouts.
+    private void capButtonSize(JButton button) {
+        Dimension d = button.getPreferredSize();
+        button.setMaximumSize(new Dimension(d.width, d.height));
     }
 
     // Applies a consistent visual style (font, colour, border, hover effect) to a button.
