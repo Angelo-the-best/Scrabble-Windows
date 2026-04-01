@@ -36,15 +36,18 @@ public class UI {
         20,20,20,20,20,20,21,21,21,21,22,22,23,23,24,25,25,26,27,27
     };
 
+    // Default constructor for the UI base class.
     public UI() {
     }
 
+    // Loads an image icon from the images resource folder by filename.
     protected ImageIcon loadIcon(String filename) {
         URL url = getClass().getResource("/images/" + filename);
         if (url != null) return new ImageIcon(url);
         return new ImageIcon("resources/images/" + filename);
     }
 
+    // Builds and displays the main menu window with Play and Exit buttons.
     public void window1() {
 
         JFrame frame1 = new JFrame("Computer Science Internal Assessment");
@@ -121,11 +124,12 @@ public class UI {
         frame1.setVisible(true);
     }
 
+    // Builds and displays the difficulty selection window.
     public void window2() {
 
         JFrame frame2 = new JFrame("Select Difficulty");
         frame2.setFont(new Font("Menlo", Font.BOLD, 10));
-        frame2.setSize(300, 260);
+        frame2.setSize(300, 225);
         frame2.setLocationRelativeTo(null);
         frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -176,6 +180,7 @@ public class UI {
         frame2.setVisible(true);
     }
 
+    // Builds and displays the main game board window with the rack, score table, and action buttons.
     public void window3() {
 
         frame3 = new JFrame("Game Board");
@@ -197,8 +202,8 @@ public class UI {
         frame3.setContentPane(bigbackground);
 
         scoreTable = new JTable(new Object[][]{
-            {" Player Score", your_score + " "},
-            {" Opponent Score", opp_score + " "}
+            {" Player Score", your_score},
+            {" Opponent Score", opp_score}
         }, new String[]{"Player", "Score"});
 
         scoreTable.setFont(new Font("Menlo", Font.BOLD, 18));
@@ -212,15 +217,17 @@ public class UI {
         scoreTable.getTableHeader().setForeground(blue2);
         scoreTable.getTableHeader().setBackground(blue1);
         scoreTable.setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, blue2));
-        scoreTable.setGridColor(Color.WHITE);
+        scoreTable.setGridColor(Color.WHITE);  // invisible grid lines
         scoreTable.setEnabled(false);
 
+        // Score column renderer — right-aligned with padding so numbers aren't flush to border
         scoreTable.getColumnModel().getColumn(1).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
                                                            boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 ((JLabel) c).setHorizontalAlignment(SwingConstants.RIGHT);
+                ((JLabel) c).setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 6));
                 c.setFont(new Font("Menlo", Font.BOLD, 18));
                 c.setForeground(blue2);
                 return c;
@@ -424,7 +431,7 @@ public class UI {
         bigbackground.add(buttonPanel3, BorderLayout.EAST);
         bigbackground.add(scoreLetterPanel, BorderLayout.WEST);
 
-        // ── Resize listener with 50ms throttle ────────────────────────────
+        // ── Resize listener with 50ms throttle ───────────────────────────
         frame3.addComponentListener(new java.awt.event.ComponentAdapter() {
             @Override public void componentResized(java.awt.event.ComponentEvent e) {
                 if (resizeTimer != null && resizeTimer.isRunning()) resizeTimer.stop();
@@ -507,59 +514,57 @@ public class UI {
         frame3.setVisible(true);
     }
 
+    // Triggers the appropriate end-game animation based on the final score comparison.
     public void window4() {
         if (your_score > opp_score)      EndAnimations.playWin(frame3);
         else if (your_score < opp_score) EndAnimations.playLose(frame3);
         else                             EndAnimations.playDraw(frame3);
     }
 
+    // Displays a modal message window with a Go-back button that unfreezes the board on close.
     public void window5(String message) {
 
         freezeBoard();
 
         JFrame frame5 = new JFrame("Message Window");
-        frame5.setSize(300, 260);
+        frame5.setSize(300, 190);  // compact height
         frame5.setLocationRelativeTo(null);
         frame5.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel panel5 = new JPanel();
-        panel5.setLayout(new BorderLayout());
+        panel5.setLayout(new BoxLayout(panel5, BoxLayout.Y_AXIS));
         panel5.setBackground(blue1);
         panel5.setOpaque(true);
+        panel5.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         frame5.setContentPane(panel5);
 
         JLabel errortext = new JLabel("<html><center>Message:<br><br>" + message + "</center></html>");
-        errortext.setBorder(BorderFactory.createEmptyBorder(30, 30, 15, 15));
-        errortext.setFont(new Font("Menlo", Font.BOLD, 17));
+        errortext.setFont(new Font("Menlo", Font.BOLD, 15));
         errortext.setForeground(blue2);
+        errortext.setAlignmentX(Component.CENTER_ALIGNMENT);
         errortext.setHorizontalAlignment(SwingConstants.CENTER);
-        panel5.add(errortext, BorderLayout.NORTH);
+        panel5.add(errortext);
+        panel5.add(Box.createRigidArea(new Dimension(0, 15)));
 
         JButton errorButton = new JButton(" Go back ");
-        styleButton(errorButton, blue2, blue1, true, 20);
+        styleButton(errorButton, blue2, blue1, true, 16);
+        errorButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         errorButton.addActionListener(e -> {
             unfreezeBoard();
             frame5.dispose();
         });
-
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
-        buttonPanel.setOpaque(false);
-        buttonPanel.add(Box.createVerticalGlue());
-        errorButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        buttonPanel.add(errorButton);
-        buttonPanel.add(Box.createVerticalGlue());
-        panel5.add(buttonPanel, BorderLayout.CENTER);
+        panel5.add(errorButton);
 
         frame5.setVisible(true);
     }
 
+    // Opens the replace window where the player enters how many letters they want to swap.
     public void replacewindow() {
 
         freezeBoard();
 
         JFrame frame6 = new JFrame("Replace Window");
-        frame6.setSize(350, 260);
+        frame6.setSize(350, 190);  // compact height
         frame6.setLocationRelativeTo(null);
         frame6.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -570,9 +575,9 @@ public class UI {
         frame6.setContentPane(panel6);
 
         JLabel replacetext = new JLabel("<html><center>How many letters do you want to replace?</center></html>", SwingConstants.CENTER);
-        replacetext.setFont(new Font("Menlo", Font.BOLD, 17));
+        replacetext.setFont(new Font("Menlo", Font.BOLD, 15));
         replacetext.setForeground(blue2);
-        replacetext.setBorder(BorderFactory.createEmptyBorder(25, 10, 10, 10));
+        replacetext.setBorder(BorderFactory.createEmptyBorder(15, 10, 5, 10));
         panel6.add(replacetext, BorderLayout.NORTH);
 
         JTextField field = new JTextField();
@@ -581,7 +586,7 @@ public class UI {
         field.setBackground(white);
         field.setForeground(blue2);
         field.setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, blue2));
-        field.setPreferredSize(new Dimension(80, 50));
+        field.setPreferredSize(new Dimension(80, 40));
 
         JPanel centerPanel = new JPanel();
         centerPanel.setOpaque(false);
@@ -589,7 +594,7 @@ public class UI {
         panel6.add(centerPanel, BorderLayout.CENTER);
 
         JButton confirm = new JButton(" Confirm ");
-        styleButton(confirm, blue2, blue1, true, 16);
+        styleButton(confirm, blue2, blue1, true, 15);
         confirm.addActionListener(e -> {
             String input = field.getText().trim();
             int count;
@@ -607,8 +612,14 @@ public class UI {
                 if (label.getIcon() != null) available++;
             }
 
-            if (count < 1 || count > available) {
+            if (count < 1 || count > 7) {
                 replacetext.setText("<html><center>Please enter a number <br> between one and seven!</center></html>");
+                field.setText("");
+                return;
+            }
+
+            if (count > available) {
+                replacetext.setText("<html><center>You only have " + available + " letter(s) in your rack!</center></html>");
                 field.setText("");
                 return;
             }
@@ -625,7 +636,7 @@ public class UI {
         });
 
         JButton cancel = new JButton(" Cancel ");
-        styleButton(cancel, blue2, blue1, true, 16);
+        styleButton(cancel, blue2, blue1, true, 15);
         cancel.addActionListener(e -> {
             unfreezeBoard();
             frame6.dispose();
@@ -642,10 +653,11 @@ public class UI {
         frame6.setVisible(true);
     }
 
+    // Displays the letter-selection UI where the player clicks individual tiles to replace.
     public void window6(int count) {
 
         JFrame replaceFrame = new JFrame("");
-        replaceFrame.setSize(450, 240);
+        replaceFrame.setSize(450, 175);  // compact height
         replaceFrame.setLocationRelativeTo(null);
         replaceFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -657,13 +669,13 @@ public class UI {
         JLabel instructions = new JLabel(
             "<html><center>Click " + count + " letter(s) to replace:</center></html>",
             SwingConstants.CENTER);
-        instructions.setFont(new Font("Menlo", Font.BOLD, 17));
+        instructions.setFont(new Font("Menlo", Font.BOLD, 15));
         instructions.setForeground(blue2);
-        instructions.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
+        instructions.setBorder(BorderFactory.createEmptyBorder(12, 10, 5, 10));
         panel.add(instructions, BorderLayout.NORTH);
 
         JPanel rackDisplay = new JPanel();
-        rackDisplay.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        rackDisplay.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 5));
         rackDisplay.setOpaque(false);
 
         ArrayList<Integer> selectedIndices = new ArrayList<>();
@@ -723,7 +735,7 @@ public class UI {
         panel.add(rackDisplay, BorderLayout.CENTER);
 
         JButton confirmButton = new JButton(" Confirm ");
-        styleButton(confirmButton, blue2, blue1, true, 16);
+        styleButton(confirmButton, blue2, blue1, true, 15);
         confirmButton.addActionListener(e -> {
             if (selectedIndices.size() != count) {
                 instructions.setText("<html><center>Please select exactly " + count + " letter(s)!</center></html>");
@@ -736,7 +748,7 @@ public class UI {
         });
 
         JButton cancelButton = new JButton(" Cancel ");
-        styleButton(cancelButton, blue2, blue1, true, 16);
+        styleButton(cancelButton, blue2, blue1, true, 15);
         cancelButton.addActionListener(e -> {
             unfreezeBoard();
             replaceFrame.dispose();
@@ -752,11 +764,19 @@ public class UI {
         replaceFrame.setVisible(true);
     }
 
+    // Stub overridden by PlayerLogic to handle word submission.
     public void submit() {}
+
+    // Stub overridden by PlayerLogic to handle letter replacement.
     public void replace1(int[] rackIndices) {}
+
+    // Stub overridden by PlayerLogic to handle a player pass.
     public void pass() {}
+
+    // Stub overridden by PlayerLogic to validate that all player tiles are on the rack.
     public boolean checktiles() { return true; }
 
+    // Opens a modal dialog asking the player to choose a letter for a blank tile.
     public char ask() {
 
         freezeBoard();
@@ -764,21 +784,24 @@ public class UI {
         final char[] result = new char[1];
 
         JDialog dialog = new JDialog(frame3, "Blank Tile", true);
-        dialog.setSize(350, 260);
+        dialog.setSize(350, 190);  // compact height
         dialog.setLocationRelativeTo(frame3);
         dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 
-        JPanel panel = new JPanel(new BorderLayout());
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(blue1);
         panel.setOpaque(true);
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
         dialog.setContentPane(panel);
 
         JLabel text = new JLabel("<html><center>You placed a blank tile!<br>Please specify your letter</center></html>");
-        text.setFont(new Font("Menlo", Font.BOLD, 17));
+        text.setFont(new Font("Menlo", Font.BOLD, 15));
         text.setForeground(blue2);
+        text.setAlignmentX(Component.CENTER_ALIGNMENT);
         text.setHorizontalAlignment(SwingConstants.CENTER);
-        text.setBorder(BorderFactory.createEmptyBorder(25, 10, 10, 10));
-        panel.add(text, BorderLayout.NORTH);
+        panel.add(text);
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
 
         JTextField field = new JTextField();
         field.setHorizontalAlignment(JTextField.CENTER);
@@ -786,15 +809,15 @@ public class UI {
         field.setBackground(white);
         field.setForeground(blue2);
         field.setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, blue2));
-        field.setPreferredSize(new Dimension(80, 50));
-
-        JPanel centerPanel = new JPanel();
-        centerPanel.setOpaque(false);
-        centerPanel.add(field);
-        panel.add(centerPanel, BorderLayout.CENTER);
+        field.setPreferredSize(new Dimension(80, 38));
+        field.setMaximumSize(new Dimension(80, 38));
+        field.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(field);
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
 
         JButton confirm = new JButton(" Confirm ");
-        styleButton(confirm, blue2, blue1, true, 18);
+        styleButton(confirm, blue2, blue1, true, 15);
+        confirm.setAlignmentX(Component.CENTER_ALIGNMENT);
         confirm.addActionListener(e -> {
             String input = field.getText().trim();
             if (input.length() == 1 && Character.isLetter(input.charAt(0))) {
@@ -806,11 +829,7 @@ public class UI {
                 field.setText("");
             }
         });
-
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setOpaque(false);
-        buttonPanel.add(confirm);
-        panel.add(buttonPanel, BorderLayout.SOUTH);
+        panel.add(confirm);
 
         dialog.getRootPane().setDefaultButton(confirm);
         dialog.setVisible(true);
@@ -818,6 +837,7 @@ public class UI {
         return result[0];
     }
 
+    // Disables all drag-and-drop handlers and action buttons during the bot's turn.
     public void freezeBoard() {
         for (int r = 0; r < 15; r++)
             for (int c = 0; c < 15; c++)
@@ -830,6 +850,7 @@ public class UI {
         disableButtons(frame3.getContentPane(), true);
     }
 
+    // Re-enables drag-and-drop and action buttons after the bot's turn ends.
     public void unfreezeBoard() {
         for (int r = 0; r < 15; r++) {
             for (int c = 0; c < 15; c++) {
@@ -869,6 +890,7 @@ public class UI {
         disableButtons(frame3.getContentPane(), false);
     }
 
+    // Recursively enables or disables all buttons in a container, keeping Exit always enabled.
     protected void disableButtons(Container container, boolean disable) {
         for (Component comp : container.getComponents()) {
             if (comp instanceof JButton) {
@@ -883,6 +905,7 @@ public class UI {
         }
     }
 
+    // Applies a consistent visual style (font, colour, border, hover effect) to a button.
     private void styleButton(JButton button, Color base, Color border, boolean have_border, int size) {
         button.setFont(new Font("Menlo", Font.BOLD, size));
         button.setBackground(border);
@@ -891,6 +914,7 @@ public class UI {
             BorderFactory.createLineBorder(border, 4, true),
             BorderFactory.createMatteBorder(0, 0, 4, 4, new Color(0, 0, 0, 60))
         ));
+        button.setMargin(new Insets(4, 20, 4, 20));  // wider horizontal padding
         button.setOpaque(true);
         button.setFocusPainted(false);
         button.setContentAreaFilled(true);
@@ -907,6 +931,7 @@ public class UI {
     class LetterTile extends JLabel {
         String letter;
 
+        // Creates a draggable letter tile label with a scaled icon and move transfer handler.
         public LetterTile(String letter, ImageIcon icon) {
             super(icon);
             this.letter = letter;
@@ -953,6 +978,8 @@ public class UI {
 
     class ImageSelection implements Transferable {
         private ImageIcon icon;
+
+        // Wraps an ImageIcon for use as transferable drag-and-drop data.
         public ImageSelection(ImageIcon icon) { this.icon = icon; }
 
         @Override
@@ -967,11 +994,13 @@ public class UI {
         private Image image;
         private String filename;
 
+        // Stores the dragged image and its filename for use during a drag-and-drop transfer.
         public LetterTransferable(Image image, String filename) {
             this.image = image;
             this.filename = filename;
         }
 
+        // Returns the filename associated with this transferable letter tile.
         public String getFilename() { return filename; }
 
         @Override
@@ -984,6 +1013,7 @@ public class UI {
 
     class CellTransferHandler extends TransferHandler {
 
+        // Returns true only if the target board cell is empty and accepts image data.
         @Override
         public boolean canImport(TransferSupport support) {
             if (!support.isDataFlavorSupported(DataFlavor.imageFlavor)) return false;
@@ -991,6 +1021,7 @@ public class UI {
             return target.getIcon() == null;
         }
 
+        // Drops the dragged tile image onto the target board cell and records its filename.
         @Override
         public boolean importData(TransferSupport support) {
             if (!canImport(support)) return false;
@@ -1008,6 +1039,7 @@ public class UI {
             }
         }
 
+        // Creates a transferable from the board cell's current icon and preserves its filename.
         @Override
         protected Transferable createTransferable(JComponent c) {
             JLabel label = (JLabel) c;
@@ -1024,16 +1056,16 @@ public class UI {
         @Override
         public int getSourceActions(JComponent c) { return MOVE; }
 
+        // Clears the source cell's icon after a successful move.
         @Override
         protected void exportDone(JComponent source, Transferable data, int action) {
             if (action == MOVE) ((JLabel) source).setIcon(null);
         }
     }
 
+    // Entry point for the base UI class; launches the main menu.
     public static void main(String[] args) {
         UI ui = new UI();
         ui.window1();
     }
 }
-
-// DA END

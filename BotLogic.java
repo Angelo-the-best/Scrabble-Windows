@@ -65,7 +65,7 @@ public class BotLogic {
             }
             UI.letters_left -= placedLetters_first;
 
-            player.scoreTable.setValueAt(UI.opp_score + " ", 1, 1);
+            player.scoreTable.setValueAt(UI.opp_score, 1, 1);
             player.passes = 0;
             waitASecond(placedLetters_first);
             updateLetters();
@@ -99,7 +99,7 @@ public class BotLogic {
         }
         int placedLetters = nonZeroBefore - nonZeroAfter;
         
-        player.scoreTable.setValueAt(UI.opp_score + " ", 1, 1);
+        player.scoreTable.setValueAt(UI.opp_score, 1, 1);
 
         int dif = UI.letters_left - placedLetters;
         if (dif < 0) UI.letters_left = 0;
@@ -655,20 +655,35 @@ public class BotLogic {
             replaceBotLetters(botLetters);
         }
         player.yourTurnBox.setText(" Your Turn ");
-        player.unfreezeBoard();
     }
 
     // Replaces all bot rack letters with fresh tiles drawn from the pool.
     public void replaceBotLetters(int[] botLetters) {
+        for (int i = 0; i < botLetters.length; i++) {
+            if (botLetters[i] != 0) {
+                for (int j = 0; j < player.Letters_Array.length; j++) {
+                    if (player.Letters_Array[j] == 0) {
+                        player.Letters_Array[j] = botLetters[i];
+                        botLetters[i] = 0;
+                        break;
+                    }
+                }
+            }
+        }
+
         int toReplace = Math.min(7, UI.letters_left);
         for (int i = 0; i < toReplace; i++) {
             int index = (int)(Math.random() * player.Letters_Array.length);
             int num = player.Letters_Array[index];
+            int attempts = 0;
 
             while (num == 0) {
                 index = (index + 1) % player.Letters_Array.length;
                 num = player.Letters_Array[index];
+                attempts++;
+                if (attempts >= player.Letters_Array.length) break;
             }
+            if (num == 0) break;
 
             player.Letters_Array[index] = 0;
             botLetters[i] = num;

@@ -370,6 +370,34 @@ public class PlayerLogic extends UI {
             return;
         }
 
+        // After the first word, every play must connect to an existing tile
+        if (!first) {
+            boolean connected = false;
+            for (Point p : pos) {
+                // If this tile was already on the board (committed), the word is connected
+                if (cells[p.x][p.y].getTransferHandler() == null) {
+                    connected = true;
+                    break;
+                }
+                // If a newly placed tile is adjacent to a committed tile, it's connected
+                int[][] neighbours = {{p.x-1,p.y},{p.x+1,p.y},{p.x,p.y-1},{p.x,p.y+1}};
+                for (int[] n : neighbours) {
+                    if (n[0] >= 0 && n[0] < 15 && n[1] >= 0 && n[1] < 15) {
+                        if (cells[n[0]][n[1]].getName() != null && cells[n[0]][n[1]].getTransferHandler() == null) {
+                            connected = true;
+                            break;
+                        }
+                    }
+                }
+                if (connected) break;
+            }
+            if (!connected) {
+                ReturnLetters();
+                window5("<html><center>Error: Word must connect to an existing tile!</center></html>");
+                return;
+            }
+        }
+
         Trie trie = new Trie();
         try {
             InputStream is = getClass().getResourceAsStream("/Words.txt");
@@ -442,7 +470,7 @@ public class PlayerLogic extends UI {
                 cells[p.x][p.y].setBackground(new Color(200, 200, 200));
             }
 
-            scoreTable.setValueAt(your_score + " ", 0, 1);
+            scoreTable.setValueAt(your_score, 0, 1);
 
             if (UI.letters_left < 10) lettersLeftBox.setText(" Letters Left: " + UI.letters_left + "  ");
             else lettersLeftBox.setText(" Letters Left: " + UI.letters_left + " ");
@@ -461,13 +489,7 @@ public class PlayerLogic extends UI {
 
     // Entry point: sets the UI scale and launches the game.
     public static void main(String[] args) {
-        String os = System.getProperty("os.name").toLowerCase();
-        if (os.contains("win")) {
-            System.setProperty("sun.java2d.uiScale", "1");
-            System.setProperty("sun.java2d.dpiaware", "true");
-        } else {
-            System.setProperty("sun.java2d.uiScale", "2");
-        }
+        System.setProperty("sun.java2d.uiScale", "2");
         PlayerLogic game = new PlayerLogic();
         game.window1();
     }
@@ -642,9 +664,9 @@ public class PlayerLogic extends UI {
             if (UI.letters_left < 7) temp = UI.letters_left;
             else temp = 7;
 
-            for (int i = 0; i < temp; i++) {
+            for (int i = 0; i < 7; i++) {
                 JLabel label = (JLabel) letters.getComponent(i);
-                if (label.getIcon() == null) {
+                if (label.getIcon() == null && temp > 0) {
                     int index = (int)(Math.random() * Letters_Array.length);
                     int num = Letters_Array[index];
                     int attempts = 0;
@@ -664,6 +686,7 @@ public class PlayerLogic extends UI {
                     label.setIcon(new ImageIcon(scaled));
                     label.setName(filename);
                     label.setTransferHandler(trackedHandler);
+                    temp--;
                 }
             }
         }
