@@ -28,13 +28,15 @@ public class UI {
     public JLabel yourTurnBox;
     public JFrame frame3;
     public JButton exitButton;
-    private javax.swing.Timer resizeTimer = null;  // throttle resize events
+    private javax.swing.Timer resizeTimer = null;
 
-    // Screen-aware scaling: bases all window sizes on actual screen resolution
+    // Screen-aware scaling based on actual screen resolution
     private static final Dimension SCREEN = Toolkit.getDefaultToolkit().getScreenSize();
     private static final double SC = Math.min(SCREEN.width / 1920.0, SCREEN.height / 1080.0);
-    private static int sw(int base) { return Math.max(50,  (int)(base * SC)); }
-    private static int sh(int base) { return Math.max(50,  (int)(base * SC)); }
+    protected static int TILE_SIZE = 45;
+
+    private static int sw(int base) { return Math.max(50, (int)(base * SC)); }
+    private static int sh(int base) { return Math.max(50, (int)(base * SC)); }
 
     protected static int[] Letters_Array = {
         1,1,1,1,1,1,1,1,1,2,2,3,3,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,6,6,
@@ -105,10 +107,18 @@ public class UI {
 
         final JButton playButton = new JButton(" Play ");
         styleButton(playButton, blue2, blue1, true, 20);
-        playButton.addActionListener(e -> { frame1.dispose(); window2(); });
 
         exitButton = new JButton(" Exit ");
         styleButton(exitButton, blue2, blue1, true, 20);
+
+        // Make menu buttons the same fixed width
+        Dimension menuBtnSize = new Dimension(sw(160), sh(45));
+        playButton.setPreferredSize(menuBtnSize);
+        playButton.setMaximumSize(menuBtnSize);
+        exitButton.setPreferredSize(menuBtnSize);
+        exitButton.setMaximumSize(menuBtnSize);
+
+        playButton.addActionListener(e -> { frame1.dispose(); window2(); });
         exitButton.addActionListener(e -> System.exit(0));
 
         JPanel buttonPanel = new JPanel();
@@ -175,6 +185,12 @@ public class UI {
         styleButton(hard, blue2, blue1, true, 17);
         hard.addActionListener(e -> { difficulty = 3; frame2.dispose(); window3(); });
 
+        // Make difficulty buttons the same fixed width
+        Dimension diffBtnSize = new Dimension(sw(160), sh(40));
+        easy.setPreferredSize(diffBtnSize);   easy.setMaximumSize(diffBtnSize);
+        medium.setPreferredSize(diffBtnSize); medium.setMaximumSize(diffBtnSize);
+        hard.setPreferredSize(diffBtnSize);   hard.setMaximumSize(diffBtnSize);
+
         JPanel buttonPanel2 = new JPanel();
         buttonPanel2.setLayout(new BoxLayout(buttonPanel2, BoxLayout.Y_AXIS));
         buttonPanel2.setOpaque(false);
@@ -225,7 +241,6 @@ public class UI {
         bigbackground.setOpaque(true);
         frame3.setContentPane(bigbackground);
 
-        // Store integers directly — no trailing spaces
         scoreTable = new JTable(new Object[][]{
             {" Player Score", your_score},
             {" Opponent Score", opp_score}
@@ -241,18 +256,17 @@ public class UI {
         scoreTable.getTableHeader().setFont(new Font("Menlo", Font.BOLD, 20));
         scoreTable.getTableHeader().setForeground(blue2);
         scoreTable.getTableHeader().setBackground(blue1);
-        scoreTable.setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, blue2));
-        scoreTable.setGridColor(Color.WHITE);  // invisible grid lines
+        scoreTable.setBorder(BorderFactory.createMatteBorder(6, 6, 6, 6, blue2));
+        scoreTable.setGridColor(Color.WHITE);
         scoreTable.setEnabled(false);
 
-        // Right-aligned with padding so numbers aren't flush to border
         scoreTable.getColumnModel().getColumn(1).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
                                                            boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 ((JLabel) c).setHorizontalAlignment(SwingConstants.RIGHT);
-                ((JLabel) c).setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 6));
+                ((JLabel) c).setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 8));
                 c.setFont(new Font("Menlo", Font.BOLD, 18));
                 c.setForeground(blue2);
                 return c;
@@ -264,9 +278,10 @@ public class UI {
         lettersLeftBox.setForeground(Color.WHITE);
         lettersLeftBox.setBackground(blue2);
         lettersLeftBox.setOpaque(true);
-        lettersLeftBox.setPreferredSize(new Dimension(200, 35));
         lettersLeftBox.setHorizontalAlignment(SwingConstants.CENTER);
         lettersLeftBox.setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, blue2));
+        lettersLeftBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        lettersLeftBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
 
         yourTurnBox = new JLabel(" Your Turn ");
         yourTurnBox.setFont(new Font("Menlo", Font.BOLD, 18));
@@ -275,10 +290,13 @@ public class UI {
         yourTurnBox.setOpaque(true);
         yourTurnBox.setHorizontalAlignment(SwingConstants.CENTER);
         yourTurnBox.setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, blue2));
+        yourTurnBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        yourTurnBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
 
         JPanel scoreLetterPanel = new JPanel();
         scoreLetterPanel.setLayout(new BoxLayout(scoreLetterPanel, BoxLayout.Y_AXIS));
         scoreLetterPanel.setOpaque(false);
+        scoreTable.setAlignmentX(Component.LEFT_ALIGNMENT);
         scoreLetterPanel.add(scoreTable);
         scoreLetterPanel.add(Box.createRigidArea(new Dimension(0, 15)));
         scoreLetterPanel.add(lettersLeftBox);
@@ -318,6 +336,12 @@ public class UI {
             System.exit(0);
         });
 
+        Dimension btnSize = new Dimension(sw(130), sh(40));
+        submit.setPreferredSize(btnSize);  submit.setMaximumSize(btnSize);
+        replace.setPreferredSize(btnSize); replace.setMaximumSize(btnSize);
+        pass.setPreferredSize(btnSize);    pass.setMaximumSize(btnSize);
+        exit.setPreferredSize(btnSize);    exit.setMaximumSize(btnSize);
+
         JPanel buttonPanel3 = new JPanel();
         buttonPanel3.setLayout(new BoxLayout(buttonPanel3, BoxLayout.Y_AXIS));
         buttonPanel3.setOpaque(false);
@@ -333,8 +357,14 @@ public class UI {
         buttonPanel3.add(pass);
         buttonPanel3.add(Box.createRigidArea(new Dimension(0, 40)));
         buttonPanel3.add(exit);
-        buttonPanel3.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 35));
+        buttonPanel3.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 20));
         buttonPanel3.add(Box.createVerticalGlue());
+
+        int boardBaseRaw = (int)(750 * SC);
+        boardBaseRaw = (boardBaseRaw / 15) * 15;
+        if (boardBaseRaw < 15) boardBaseRaw = 15;
+        final int boardBase = boardBaseRaw;
+        TILE_SIZE = Math.max(10, (int)((boardBase / 15) * 0.9));
 
         JPanel boardPanel = new JPanel(new GridLayout(15, 15)) {
             @Override
@@ -344,10 +374,6 @@ public class UI {
                 g.drawImage(boardImg, 0, 0, getWidth(), getHeight(), this);
             }
         };
-        int boardBaseRaw = (int)(750 * SC);
-        boardBaseRaw = (boardBaseRaw / 15) * 15;
-        if (boardBaseRaw < 15) boardBaseRaw = 15;
-        final int boardBase = boardBaseRaw;
         boardPanel.setPreferredSize(new Dimension(boardBase, boardBase));
         boardPanel.setMinimumSize(new Dimension(boardBase, boardBase));
         boardPanel.setMaximumSize(new Dimension(boardBase, boardBase));
@@ -395,8 +421,6 @@ public class UI {
         letters.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
         letters.setOpaque(false);
 
-        int initTileSz = Math.max(10, (int)((boardBase / 15) * 0.9));
-
         for (int i = 0; i < 7; i++) {
             int index = (int)(Math.random() * Letters_Array.length);
             int num = Letters_Array[index];
@@ -409,11 +433,11 @@ public class UI {
             lettersLeftBox.setText(" Letters Left: " + letters_left + " ");
 
             String filename = num + ".png";
-            Image scaled = scaleImage(filename, initTileSz);
+            Image scaled = scaleImage(filename, TILE_SIZE);
 
             JLabel slot = new JLabel(new ImageIcon(scaled));
             slot.setName(filename);
-            slot.setPreferredSize(new Dimension(initTileSz + 5, initTileSz + 5));
+            slot.setPreferredSize(new Dimension(TILE_SIZE + 5, TILE_SIZE + 5));
             slot.setHorizontalAlignment(SwingConstants.CENTER);
             slot.setVerticalAlignment(SwingConstants.CENTER);
             slot.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0, 30)));
@@ -461,7 +485,7 @@ public class UI {
         bigbackground.add(buttonPanel3, BorderLayout.EAST);
         bigbackground.add(scoreLetterPanel, BorderLayout.WEST);
 
-        // ── Resize listener with 50ms throttle so it doesn't lag ──────────
+        // ── Resize listener with 50ms throttle ───────────────────────────
         frame3.addComponentListener(new java.awt.event.ComponentAdapter() {
             @Override public void componentResized(java.awt.event.ComponentEvent e) {
                 if (resizeTimer != null && resizeTimer.isRunning()) resizeTimer.stop();
@@ -469,15 +493,16 @@ public class UI {
                     ((javax.swing.Timer) evt.getSource()).stop();
 
                     int fw = frame3.getWidth(), fh = frame3.getHeight();
-                    double sc = Math.max(0.3, Math.min(fw / (1300.0 * SC), fh / (928.0 * SC)));
+                    double sc = Math.max(0.3, Math.min(fw / (double)sw(1300), fh / (double)sh(928)));
 
-                    int bs = (Math.round((int)(boardBase * sc) / 15)) * 15;
+                    int bs = ((int)(boardBase * sc) / 15) * 15;
                     if (bs < 15) bs = 15;
                     boardPanel.setPreferredSize(new Dimension(bs, bs));
                     boardPanel.setMinimumSize(new Dimension(bs, bs));
                     boardPanel.setMaximumSize(new Dimension(bs, bs));
 
                     int cellSz = Math.max(10, (int)((bs / 15) * 0.9));
+                    TILE_SIZE = cellSz;
                     for (int r = 0; r < 15; r++) {
                         for (int c2 = 0; c2 < 15; c2++) {
                             JLabel cell = cells[r][c2];
@@ -497,8 +522,6 @@ public class UI {
                     scoreTable.getColumnModel().getColumn(1).setPreferredWidth((int)(60  * sc));
 
                     lettersLeftBox.setFont(new Font("Menlo", Font.BOLD, tf));
-                    lettersLeftBox.setPreferredSize(
-                        new Dimension((int)(200 * sc), (int)(35 * sc)));
                     yourTurnBox.setFont(new Font("Menlo", Font.BOLD, tf));
 
                     int tileSz = cellSz;
@@ -515,10 +538,17 @@ public class UI {
                     letters.revalidate();
 
                     int bf = Math.max(10, (int)(20 * sc));
+                    int bw = (int)(sw(130) * sc);
+                    int bh = (int)(sh(40)  * sc);
+                    Dimension nd = new Dimension(bw, bh);
                     submit.setFont(new Font("Menlo", Font.BOLD, bf));
                     replace.setFont(new Font("Menlo", Font.BOLD, bf));
                     pass.setFont(new Font("Menlo", Font.BOLD, bf));
                     exit.setFont(new Font("Menlo", Font.BOLD, bf));
+                    submit.setPreferredSize(nd);  submit.setMaximumSize(nd);
+                    replace.setPreferredSize(nd); replace.setMaximumSize(nd);
+                    pass.setPreferredSize(nd);    pass.setMaximumSize(nd);
+                    exit.setPreferredSize(nd);    exit.setMaximumSize(nd);
 
                     frame3.revalidate();
                     frame3.repaint();
@@ -553,7 +583,7 @@ public class UI {
         freezeBoard();
 
         JFrame frame5 = new JFrame("Message Window");
-        frame5.setSize(sw(300), sh(190));
+        frame5.setSize(sw(320), sh(240));
         frame5.setLocationRelativeTo(null);
         frame5.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -570,10 +600,13 @@ public class UI {
         errortext.setAlignmentX(Component.CENTER_ALIGNMENT);
         errortext.setHorizontalAlignment(SwingConstants.CENTER);
         panel5.add(errortext);
-        panel5.add(Box.createRigidArea(new Dimension(0, 15)));
+        panel5.add(Box.createRigidArea(new Dimension(0, 18)));
 
         JButton errorButton = new JButton(" Go back ");
         styleButton(errorButton, blue2, blue1, true, 16);
+        Dimension popBtnSize = new Dimension(sw(140), sh(38));
+        errorButton.setPreferredSize(popBtnSize);
+        errorButton.setMaximumSize(popBtnSize);
         errorButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         errorButton.addActionListener(e -> {
             unfreezeBoard();
@@ -590,7 +623,7 @@ public class UI {
         freezeBoard();
 
         JFrame frame6 = new JFrame("Replace Window");
-        frame6.setSize(sw(350), sh(190));
+        frame6.setSize(sw(360), sh(240));
         frame6.setLocationRelativeTo(null);
         frame6.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -612,7 +645,7 @@ public class UI {
         field.setBackground(white);
         field.setForeground(blue2);
         field.setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, blue2));
-        field.setPreferredSize(new Dimension(80, 40));
+        field.setPreferredSize(new Dimension(80, 42));
 
         JPanel centerPanel = new JPanel();
         centerPanel.setOpaque(false);
@@ -621,6 +654,13 @@ public class UI {
 
         JButton confirm = new JButton(" Confirm ");
         styleButton(confirm, blue2, blue1, true, 15);
+        JButton cancel = new JButton(" Cancel ");
+        styleButton(cancel, blue2, blue1, true, 15);
+
+        Dimension popBtnSize = new Dimension(sw(120), sh(36));
+        confirm.setPreferredSize(popBtnSize); confirm.setMaximumSize(popBtnSize);
+        cancel.setPreferredSize(popBtnSize);  cancel.setMaximumSize(popBtnSize);
+
         confirm.addActionListener(e -> {
             String input = field.getText().trim();
             int count;
@@ -661,8 +701,6 @@ public class UI {
             else window6(count);
         });
 
-        JButton cancel = new JButton(" Cancel ");
-        styleButton(cancel, blue2, blue1, true, 15);
         cancel.addActionListener(e -> {
             unfreezeBoard();
             frame6.dispose();
@@ -683,7 +721,7 @@ public class UI {
     public void window6(int count) {
 
         JFrame replaceFrame = new JFrame("");
-        replaceFrame.setSize(sw(450), sh(175));
+        replaceFrame.setSize(sw(460), sh(220));
         replaceFrame.setLocationRelativeTo(null);
         replaceFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -701,7 +739,7 @@ public class UI {
         panel.add(instructions, BorderLayout.NORTH);
 
         JPanel rackDisplay = new JPanel();
-        rackDisplay.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 5));
+        rackDisplay.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 8));
         rackDisplay.setOpaque(false);
 
         ArrayList<Integer> selectedIndices = new ArrayList<>();
@@ -713,7 +751,7 @@ public class UI {
 
             if (originalLabel.getIcon() != null) {
                 JLabel clickableLabel = new JLabel(originalLabel.getIcon());
-                clickableLabel.setPreferredSize(new Dimension(50, 50));
+                clickableLabel.setPreferredSize(new Dimension(TILE_SIZE + 5, TILE_SIZE + 5));
                 clickableLabel.setBorder(BorderFactory.createLineBorder(blue2, 2));
                 clickableLabel.setHorizontalAlignment(SwingConstants.CENTER);
                 clickableLabel.setVerticalAlignment(SwingConstants.CENTER);
@@ -762,6 +800,13 @@ public class UI {
 
         JButton confirmButton = new JButton(" Confirm ");
         styleButton(confirmButton, blue2, blue1, true, 15);
+        JButton cancelButton = new JButton(" Cancel ");
+        styleButton(cancelButton, blue2, blue1, true, 15);
+
+        Dimension popBtnSize = new Dimension(sw(120), sh(36));
+        confirmButton.setPreferredSize(popBtnSize); confirmButton.setMaximumSize(popBtnSize);
+        cancelButton.setPreferredSize(popBtnSize);  cancelButton.setMaximumSize(popBtnSize);
+
         confirmButton.addActionListener(e -> {
             if (selectedIndices.size() != count) {
                 instructions.setText("<html><center>Please select exactly " + count + " letter(s)!</center></html>");
@@ -773,8 +818,6 @@ public class UI {
             replace1(indices);
         });
 
-        JButton cancelButton = new JButton(" Cancel ");
-        styleButton(cancelButton, blue2, blue1, true, 15);
         cancelButton.addActionListener(e -> {
             unfreezeBoard();
             replaceFrame.dispose();
@@ -810,7 +853,7 @@ public class UI {
         final char[] result = new char[1];
 
         JDialog dialog = new JDialog(frame3, "Blank Tile", true);
-        dialog.setSize(sw(350), sh(190));
+        dialog.setSize(sw(360), sh(240));
         dialog.setLocationRelativeTo(frame3);
         dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 
@@ -818,7 +861,7 @@ public class UI {
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(blue1);
         panel.setOpaque(true);
-        panel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+        panel.setBorder(BorderFactory.createEmptyBorder(18, 20, 18, 20));
         dialog.setContentPane(panel);
 
         JLabel text = new JLabel("<html><center>You placed a blank tile!<br>Please specify your letter</center></html>");
@@ -827,7 +870,7 @@ public class UI {
         text.setAlignmentX(Component.CENTER_ALIGNMENT);
         text.setHorizontalAlignment(SwingConstants.CENTER);
         panel.add(text);
-        panel.add(Box.createRigidArea(new Dimension(0, 10)));
+        panel.add(Box.createRigidArea(new Dimension(0, 12)));
 
         JTextField field = new JTextField();
         field.setHorizontalAlignment(JTextField.CENTER);
@@ -835,14 +878,17 @@ public class UI {
         field.setBackground(white);
         field.setForeground(blue2);
         field.setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, blue2));
-        field.setPreferredSize(new Dimension(80, 38));
-        field.setMaximumSize(new Dimension(80, 38));
+        field.setPreferredSize(new Dimension(80, 40));
+        field.setMaximumSize(new Dimension(80, 40));
         field.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(field);
-        panel.add(Box.createRigidArea(new Dimension(0, 10)));
+        panel.add(Box.createRigidArea(new Dimension(0, 12)));
 
         JButton confirm = new JButton(" Confirm ");
         styleButton(confirm, blue2, blue1, true, 15);
+        Dimension popBtnSize = new Dimension(sw(140), sh(38));
+        confirm.setPreferredSize(popBtnSize);
+        confirm.setMaximumSize(popBtnSize);
         confirm.setAlignmentX(Component.CENTER_ALIGNMENT);
         confirm.addActionListener(e -> {
             String input = field.getText().trim();
@@ -940,7 +986,6 @@ public class UI {
             BorderFactory.createLineBorder(border, 4, true),
             BorderFactory.createMatteBorder(0, 0, 4, 4, new Color(0, 0, 0, 60))
         ));
-        button.setMargin(new Insets(4, 20, 4, 20));  // wider horizontal padding
         button.setOpaque(true);
         button.setFocusPainted(false);
         button.setContentAreaFilled(true);
