@@ -344,9 +344,10 @@ public class UI {
                 g.drawImage(boardImg, 0, 0, getWidth(), getHeight(), this);
             }
         };
-        int boardBase = (int)(750 * SC);
-        boardBase = (boardBase / 15) * 15;
-        if (boardBase < 15) boardBase = 15;
+        int boardBaseRaw = (int)(750 * SC);
+        boardBaseRaw = (boardBaseRaw / 15) * 15;
+        if (boardBaseRaw < 15) boardBaseRaw = 15;
+        final int boardBase = boardBaseRaw;
         boardPanel.setPreferredSize(new Dimension(boardBase, boardBase));
         boardPanel.setMinimumSize(new Dimension(boardBase, boardBase));
         boardPanel.setMaximumSize(new Dimension(boardBase, boardBase));
