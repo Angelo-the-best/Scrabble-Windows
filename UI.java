@@ -29,6 +29,13 @@ public class UI {
     public JFrame frame3;
     public JButton exitButton;
     private javax.swing.Timer resizeTimer = null;  // throttle resize events
+
+    // Screen-aware scaling: bases all window sizes on actual screen resolution
+    private static final Dimension SCREEN = Toolkit.getDefaultToolkit().getScreenSize();
+    private static final double SC = Math.min(SCREEN.width / 1920.0, SCREEN.height / 1080.0);
+    private static int sw(int base) { return Math.max(50,  (int)(base * SC)); }
+    private static int sh(int base) { return Math.max(50,  (int)(base * SC)); }
+
     protected static int[] Letters_Array = {
         1,1,1,1,1,1,1,1,1,2,2,3,3,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,6,6,
         7,7,7,8,8,9,9,9,9,9,9,9,9,9,10,11,12,12,12,12,13,13,14,14,14,14,14,14,
@@ -47,12 +54,29 @@ public class UI {
         return new ImageIcon("resources/images/" + filename);
     }
 
+    // High quality image scaling using BICUBIC interpolation.
+    protected Image scaleImage(String filename, int size) {
+        ImageIcon icon = loadIcon(filename);
+        java.awt.image.BufferedImage buf = new java.awt.image.BufferedImage(
+            size, size, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = buf.createGraphics();
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+            RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        g2.setRenderingHint(RenderingHints.KEY_RENDERING,
+            RenderingHints.VALUE_RENDER_QUALITY);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+            RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.drawImage(icon.getImage(), 0, 0, size, size, null);
+        g2.dispose();
+        return buf;
+    }
+
     // Builds and displays the main menu window with Play and Exit buttons.
     public void window1() {
 
         JFrame frame1 = new JFrame("Computer Science Internal Assessment");
         frame1.setFont(new Font("Menlo", Font.BOLD, 10));
-        frame1.setSize(600, 450);
+        frame1.setSize(sw(600), sh(450));
         frame1.setLocationRelativeTo(null);
         frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -77,7 +101,7 @@ public class UI {
         };
         titleLabel.setBorder(BorderFactory.createEmptyBorder(50, 30, 0, 30));
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        titleLabel.setPreferredSize(new Dimension(538, 136));
+        titleLabel.setPreferredSize(new Dimension(sw(538), sh(136)));
 
         final JButton playButton = new JButton(" Play ");
         styleButton(playButton, blue2, blue1, true, 20);
@@ -129,7 +153,7 @@ public class UI {
 
         JFrame frame2 = new JFrame("Select Difficulty");
         frame2.setFont(new Font("Menlo", Font.BOLD, 10));
-        frame2.setSize(300, 225);
+        frame2.setSize(sw(300), sh(225));
         frame2.setLocationRelativeTo(null);
         frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -184,7 +208,7 @@ public class UI {
     public void window3() {
 
         frame3 = new JFrame("Game Board");
-        frame3.setSize(1300, 928);
+        frame3.setSize(sw(1300), sh(928));
         frame3.setLocationRelativeTo(null);
         frame3.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -320,9 +344,12 @@ public class UI {
                 g.drawImage(boardImg, 0, 0, getWidth(), getHeight(), this);
             }
         };
-        boardPanel.setPreferredSize(new Dimension(750, 750));
-        boardPanel.setMinimumSize(new Dimension(750, 750));
-        boardPanel.setMaximumSize(new Dimension(750, 750));
+        int boardBase = (int)(750 * SC);
+        boardBase = (boardBase / 15) * 15;
+        if (boardBase < 15) boardBase = 15;
+        boardPanel.setPreferredSize(new Dimension(boardBase, boardBase));
+        boardPanel.setMinimumSize(new Dimension(boardBase, boardBase));
+        boardPanel.setMaximumSize(new Dimension(boardBase, boardBase));
         boardPanel.setOpaque(false);
 
         for (int r = 0; r < 15; r++) {
@@ -367,6 +394,8 @@ public class UI {
         letters.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
         letters.setOpaque(false);
 
+        int initTileSz = Math.max(10, (int)((boardBase / 15) * 0.9));
+
         for (int i = 0; i < 7; i++) {
             int index = (int)(Math.random() * Letters_Array.length);
             int num = Letters_Array[index];
@@ -379,12 +408,11 @@ public class UI {
             lettersLeftBox.setText(" Letters Left: " + letters_left + " ");
 
             String filename = num + ".png";
-            ImageIcon icon = loadIcon(filename);
-            Image scaled = icon.getImage().getScaledInstance(45, 45, Image.SCALE_SMOOTH);
+            Image scaled = scaleImage(filename, initTileSz);
 
             JLabel slot = new JLabel(new ImageIcon(scaled));
             slot.setName(filename);
-            slot.setPreferredSize(new Dimension(50, 50));
+            slot.setPreferredSize(new Dimension(initTileSz + 5, initTileSz + 5));
             slot.setHorizontalAlignment(SwingConstants.CENTER);
             slot.setVerticalAlignment(SwingConstants.CENTER);
             slot.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0, 30)));
@@ -432,7 +460,7 @@ public class UI {
         bigbackground.add(buttonPanel3, BorderLayout.EAST);
         bigbackground.add(scoreLetterPanel, BorderLayout.WEST);
 
-        // ── Resize listener with 50ms throttle so it doesn't lag on Windows ──
+        // ── Resize listener with 50ms throttle so it doesn't lag ──────────
         frame3.addComponentListener(new java.awt.event.ComponentAdapter() {
             @Override public void componentResized(java.awt.event.ComponentEvent e) {
                 if (resizeTimer != null && resizeTimer.isRunning()) resizeTimer.stop();
@@ -440,9 +468,9 @@ public class UI {
                     ((javax.swing.Timer) evt.getSource()).stop();
 
                     int fw = frame3.getWidth(), fh = frame3.getHeight();
-                    double sc = Math.max(0.3, Math.min(fw / 1300.0, fh / 900.0));
+                    double sc = Math.max(0.3, Math.min(fw / (1300.0 * SC), fh / (928.0 * SC)));
 
-                    int bs = (Math.round((int)(750 * sc) / 15)) * 15;
+                    int bs = (Math.round((int)(boardBase * sc) / 15)) * 15;
                     if (bs < 15) bs = 15;
                     boardPanel.setPreferredSize(new Dimension(bs, bs));
                     boardPanel.setMinimumSize(new Dimension(bs, bs));
@@ -454,9 +482,7 @@ public class UI {
                             JLabel cell = cells[r][c2];
                             String fname = cell.getName();
                             if (cell.getIcon() != null && fname != null && !fname.isEmpty()) {
-                                Image img = loadIcon(fname).getImage()
-                                    .getScaledInstance(cellSz, cellSz, Image.SCALE_SMOOTH);
-                                cell.setIcon(new ImageIcon(img));
+                                cell.setIcon(new ImageIcon(scaleImage(fname, cellSz)));
                             }
                         }
                     }
@@ -481,9 +507,7 @@ public class UI {
                             lbl.setPreferredSize(new Dimension(tileSz + 5, tileSz + 5));
                             String fname = lbl.getName();
                             if (fname != null && !fname.isEmpty() && lbl.getIcon() != null) {
-                                Image img = loadIcon(fname).getImage()
-                                    .getScaledInstance(tileSz, tileSz, Image.SCALE_SMOOTH);
-                                lbl.setIcon(new ImageIcon(img));
+                                lbl.setIcon(new ImageIcon(scaleImage(fname, tileSz)));
                             }
                         }
                     }
@@ -528,7 +552,7 @@ public class UI {
         freezeBoard();
 
         JFrame frame5 = new JFrame("Message Window");
-        frame5.setSize(300, 190);
+        frame5.setSize(sw(300), sh(190));
         frame5.setLocationRelativeTo(null);
         frame5.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -565,7 +589,7 @@ public class UI {
         freezeBoard();
 
         JFrame frame6 = new JFrame("Replace Window");
-        frame6.setSize(350, 190);
+        frame6.setSize(sw(350), sh(190));
         frame6.setLocationRelativeTo(null);
         frame6.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -658,7 +682,7 @@ public class UI {
     public void window6(int count) {
 
         JFrame replaceFrame = new JFrame("");
-        replaceFrame.setSize(450, 175);
+        replaceFrame.setSize(sw(450), sh(175));
         replaceFrame.setLocationRelativeTo(null);
         replaceFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -785,7 +809,7 @@ public class UI {
         final char[] result = new char[1];
 
         JDialog dialog = new JDialog(frame3, "Blank Tile", true);
-        dialog.setSize(350, 190);
+        dialog.setSize(sw(350), sh(190));
         dialog.setLocationRelativeTo(frame3);
         dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 
