@@ -28,7 +28,7 @@ public class UI {
     public JLabel yourTurnBox;
     public JFrame frame3;
     public JButton exitButton;
-    private javax.swing.Timer resizeTimer = null;
+    private javax.swing.Timer resizeTimer = null;  // throttle resize events
     protected static int[] Letters_Array = {
         1,1,1,1,1,1,1,1,1,2,2,3,3,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,6,6,
         7,7,7,8,8,9,9,9,9,9,9,9,9,9,10,11,12,12,12,12,13,13,14,14,14,14,14,14,
@@ -201,6 +201,7 @@ public class UI {
         bigbackground.setOpaque(true);
         frame3.setContentPane(bigbackground);
 
+        // Store integers directly — no trailing spaces
         scoreTable = new JTable(new Object[][]{
             {" Player Score", your_score},
             {" Opponent Score", opp_score}
@@ -220,7 +221,7 @@ public class UI {
         scoreTable.setGridColor(Color.WHITE);  // invisible grid lines
         scoreTable.setEnabled(false);
 
-        // Score column renderer — right-aligned with padding so numbers aren't flush to border
+        // Right-aligned with padding so numbers aren't flush to border
         scoreTable.getColumnModel().getColumn(1).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
@@ -431,7 +432,7 @@ public class UI {
         bigbackground.add(buttonPanel3, BorderLayout.EAST);
         bigbackground.add(scoreLetterPanel, BorderLayout.WEST);
 
-        // ── Resize listener with 50ms throttle ───────────────────────────
+        // ── Resize listener with 50ms throttle so it doesn't lag on Windows ──
         frame3.addComponentListener(new java.awt.event.ComponentAdapter() {
             @Override public void componentResized(java.awt.event.ComponentEvent e) {
                 if (resizeTimer != null && resizeTimer.isRunning()) resizeTimer.stop();
@@ -527,7 +528,7 @@ public class UI {
         freezeBoard();
 
         JFrame frame5 = new JFrame("Message Window");
-        frame5.setSize(300, 190);  // compact height
+        frame5.setSize(300, 190);
         frame5.setLocationRelativeTo(null);
         frame5.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -564,7 +565,7 @@ public class UI {
         freezeBoard();
 
         JFrame frame6 = new JFrame("Replace Window");
-        frame6.setSize(350, 190);  // compact height
+        frame6.setSize(350, 190);
         frame6.setLocationRelativeTo(null);
         frame6.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -657,7 +658,7 @@ public class UI {
     public void window6(int count) {
 
         JFrame replaceFrame = new JFrame("");
-        replaceFrame.setSize(450, 175);  // compact height
+        replaceFrame.setSize(450, 175);
         replaceFrame.setLocationRelativeTo(null);
         replaceFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -784,7 +785,7 @@ public class UI {
         final char[] result = new char[1];
 
         JDialog dialog = new JDialog(frame3, "Blank Tile", true);
-        dialog.setSize(350, 190);  // compact height
+        dialog.setSize(350, 190);
         dialog.setLocationRelativeTo(frame3);
         dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 
