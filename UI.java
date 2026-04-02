@@ -29,11 +29,11 @@ public class UI {
     public JFrame frame3;
     public JButton exitButton;
     private javax.swing.Timer resizeTimer = null;
+    protected static int TILE_SIZE = 45;
 
     // Screen-aware scaling based on actual screen resolution
     private static final Dimension SCREEN = Toolkit.getDefaultToolkit().getScreenSize();
     private static final double SC = Math.min(SCREEN.width / 1920.0, SCREEN.height / 1080.0);
-    protected static int TILE_SIZE = 45;
 
     private static int sw(int base) { return Math.max(50, (int)(base * SC)); }
     private static int sh(int base) { return Math.max(30, (int)(base * SC)); }
@@ -211,8 +211,8 @@ public class UI {
         frame3.setContentPane(bigbackground);
 
         scoreTable = new JTable(new Object[][]{
-            {" Player Score", your_score},
-            {" Opponent Score", opp_score}
+            {" Player Score", your_score + " "},
+            {" Opponent Score", opp_score + " "}
         }, new String[]{"Player", "Score"});
 
         scoreTable.setFont(new Font("Menlo", Font.BOLD, 18));
@@ -305,7 +305,6 @@ public class UI {
             System.exit(0);
         });
 
-        // Cap button width at natural preferred size — prevents stretching in BoxLayout
         capButtonSize(submit);
         capButtonSize(replace);
         capButtonSize(pass);
@@ -329,6 +328,7 @@ public class UI {
         buttonPanel3.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 20));
         buttonPanel3.add(Box.createVerticalGlue());
 
+        // Board size scaled to screen
         int boardBaseRaw = (int)(750 * SC);
         boardBaseRaw = (boardBaseRaw / 15) * 15;
         if (boardBaseRaw < 15) boardBaseRaw = 15;
@@ -403,7 +403,6 @@ public class UI {
 
             String filename = num + ".png";
             ImageIcon icon = loadIcon(filename);
-            // Use SCALE_SMOOTH — matches bot tile rendering and PlayerLogic
             Image scaled = icon.getImage().getScaledInstance(TILE_SIZE, TILE_SIZE, Image.SCALE_SMOOTH);
 
             JLabel slot = new JLabel(new ImageIcon(scaled));
@@ -475,7 +474,6 @@ public class UI {
                     int cellSz = Math.max(10, (int)((bs / 15) * 0.9));
                     TILE_SIZE = cellSz;
 
-                    // Board placed tiles
                     for (int r = 0; r < 15; r++) {
                         for (int c2 = 0; c2 < 15; c2++) {
                             JLabel cell = cells[r][c2];
@@ -499,7 +497,6 @@ public class UI {
                     lettersLeftBox.setFont(new Font("Menlo", Font.BOLD, tf));
                     yourTurnBox.setFont(new Font("Menlo", Font.BOLD, tf));
 
-                    // Rack tiles
                     int tileSz = cellSz;
                     for (Component comp : letters.getComponents()) {
                         if (comp instanceof JLabel) {

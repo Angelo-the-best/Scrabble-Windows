@@ -65,7 +65,7 @@ public class BotLogic {
             }
             UI.letters_left -= placedLetters_first;
 
-            player.scoreTable.setValueAt(UI.opp_score, 1, 1);
+            player.scoreTable.setValueAt(UI.opp_score + " ", 1, 1);
             player.passes = 0;
             waitASecond(placedLetters_first);
             updateLetters();
@@ -99,7 +99,7 @@ public class BotLogic {
         }
         int placedLetters = nonZeroBefore - nonZeroAfter;
         
-        player.scoreTable.setValueAt(UI.opp_score, 1, 1);
+        player.scoreTable.setValueAt(UI.opp_score + " ", 1, 1);
 
         int dif = UI.letters_left - placedLetters;
         if (dif < 0) UI.letters_left = 0;

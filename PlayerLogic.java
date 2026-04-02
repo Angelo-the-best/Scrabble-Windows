@@ -206,8 +206,9 @@ public class PlayerLogic extends UI {
 
             String filename = num + ".png";
             ImageIcon icon = loadIcon(filename);
-            Image scaled = icon.getImage().getScaledInstance(45, 45, Image.SCALE_SMOOTH);
+            Image scaled = icon.getImage().getScaledInstance(TILE_SIZE, TILE_SIZE, Image.SCALE_SMOOTH);
             label.setIcon(new ImageIcon(scaled));
+            label.setPreferredSize(new Dimension(TILE_SIZE + 5, TILE_SIZE + 5));
             label.setName(filename);
             label.setTransferHandler(trackedHandler);
         }
@@ -250,6 +251,9 @@ public class PlayerLogic extends UI {
             window5("Error: No letters have been placed!");
             return;
         }
+
+        // Remember whether this is the first word BEFORE flipping the flag
+        boolean wasFirst = first;
 
         if (first) {
             if (cells[7][7].getName() == null) {
@@ -370,16 +374,14 @@ public class PlayerLogic extends UI {
             return;
         }
 
-        // After the first word, every play must connect to an existing tile
-        if (!first) {
+        // Only check connectivity from the second word onwards
+        if (!wasFirst) {
             boolean connected = false;
             for (Point p : pos) {
-                // If this tile was already on the board (committed), the word is connected
                 if (cells[p.x][p.y].getTransferHandler() == null) {
                     connected = true;
                     break;
                 }
-                // If a newly placed tile is adjacent to a committed tile, it's connected
                 int[][] neighbours = {{p.x-1,p.y},{p.x+1,p.y},{p.x,p.y-1},{p.x,p.y+1}};
                 for (int[] n : neighbours) {
                     if (n[0] >= 0 && n[0] < 15 && n[1] >= 0 && n[1] < 15) {
@@ -446,7 +448,7 @@ public class PlayerLogic extends UI {
                     int letterNum = (int) blankChoices[b++] - 'A' + 1;
                     String filename = letterNum + ".png";
                     ImageIcon icon = loadIcon(filename);
-                    Image scaled = icon.getImage().getScaledInstance(45, 45, Image.SCALE_SMOOTH);
+                    Image scaled = icon.getImage().getScaledInstance(TILE_SIZE, TILE_SIZE, Image.SCALE_SMOOTH);
                     label.setIcon(new ImageIcon(scaled));
                     label.setName(filename);
                     label.putClientProperty("isBlank", true);
@@ -460,7 +462,7 @@ public class PlayerLogic extends UI {
             int end = endPoint.x * 15 + endPoint.y;
             int[] positions = getPosition(start, end);
 
-            your_score += score_calc(word, positions, blankIndx,true);
+            your_score += score_calc(word, positions, blankIndx, true);
             int dif = letters_left - placedLetters;
             if (dif < 0) letters_left = 0;
             else letters_left = dif;
@@ -489,7 +491,13 @@ public class PlayerLogic extends UI {
 
     // Entry point: sets the UI scale and launches the game.
     public static void main(String[] args) {
-        System.setProperty("sun.java2d.uiScale", "2");
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.contains("win")) {
+            System.setProperty("sun.java2d.uiScale", "1");
+            System.setProperty("sun.java2d.dpiaware", "true");
+        } else {
+            System.setProperty("sun.java2d.uiScale", "2");
+        }
         PlayerLogic game = new PlayerLogic();
         game.window1();
     }
@@ -562,7 +570,7 @@ public class PlayerLogic extends UI {
             if (DOUBLE_LETTER_POSITIONS.contains(pos)) {
                 letterMultiplier = 2;
                 if (commit) DOUBLE_LETTER_POSITIONS.remove(pos);
-            } 
+            }
             else if (TRIPLE_LETTER_POSITIONS.contains(pos)) {
                 letterMultiplier = 3;
                 if (commit) TRIPLE_LETTER_POSITIONS.remove(pos);
@@ -571,7 +579,7 @@ public class PlayerLogic extends UI {
             if (DOUBLE_WORD_POSITIONS.contains(pos)) {
                 wordMultiplier *= 2;
                 if (commit) DOUBLE_WORD_POSITIONS.remove(pos);
-            } 
+            }
             else if (TRIPLE_WORD_POSITIONS.contains(pos)) {
                 wordMultiplier *= 3;
                 if (commit) TRIPLE_WORD_POSITIONS.remove(pos);
@@ -682,8 +690,9 @@ public class PlayerLogic extends UI {
                     Letters_Array[index] = 0;
                     String filename = num + ".png";
                     ImageIcon icon = loadIcon(filename);
-                    Image scaled = icon.getImage().getScaledInstance(45, 45, Image.SCALE_SMOOTH);
+                    Image scaled = icon.getImage().getScaledInstance(TILE_SIZE, TILE_SIZE, Image.SCALE_SMOOTH);
                     label.setIcon(new ImageIcon(scaled));
+                    label.setPreferredSize(new Dimension(TILE_SIZE + 5, TILE_SIZE + 5));
                     label.setName(filename);
                     label.setTransferHandler(trackedHandler);
                     temp--;
